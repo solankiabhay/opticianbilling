@@ -61,7 +61,9 @@ public class BillController {
     private String cell(String value){
         if(value==null)return "";
         String safe=value.replace("\r"," ").replace("\n"," ");
-        if(safe.startsWith("=")||safe.startsWith("+")||safe.startsWith("-")||safe.startsWith("@")) safe="'"+safe;
+        int first = 0;
+        while (first < safe.length() && (Character.isWhitespace(safe.charAt(first)) || Character.isISOControl(safe.charAt(first)))) first++;
+        if (first < safe.length() && "=+-@".indexOf(safe.charAt(first)) >= 0) safe = "'" + safe;
         return "\"" + safe.replace("\"", "\"\"") + "\"";
     }
 }
