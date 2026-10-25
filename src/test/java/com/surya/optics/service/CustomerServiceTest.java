@@ -4,11 +4,13 @@ import com.surya.optics.dto.CustomerDTO;
 import com.surya.optics.entity.Customer;
 import com.surya.optics.repository.CustomerRepository;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class CustomerServiceTest {
     private final CustomerRepository repository = mock(CustomerRepository.class);
@@ -20,6 +22,24 @@ class CustomerServiceTest {
         dto.setPhone("9876543210");
         dto.setAge(age);
         return dto;
+    }
+
+    @Test
+    void acceptsAgeBoundariesZeroAnd130() {
+        when(repository.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CustomerDTO newborn = service.createCustomer(validCustomer(0));
+        CustomerDTO oldest = service.createCustomer(validCustomer(130));
+
+        assertEquals(0, newborn.getAge());
+        assertEquals(130, oldest.getAge());
+        verify(repository, org.mockito.Mockito.times(2)).save(any(Customer.class));
+    }
+
+    @Test
+    void allowsAgeToBeUnspecified() {
+        when(repository.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        assertEquals(null, service.createCustomer(validCustomer(null)).getAge());
     }
 
     @Test
