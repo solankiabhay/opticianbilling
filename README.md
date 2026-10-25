@@ -45,6 +45,10 @@ The project currently uses spring.jpa.hibernate.ddl-auto=update for convenience.
 
 Back up the database before applying schema changes. Check the existing schema and constraints first; do not run a migration blindly on a production database.
 
+## Cloud deployment from GitHub
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the GitHub-connected Railway + MySQL deployment guide, required environment variables, HTTPS setup, Android connection steps, and troubleshooting. The repository includes `railway.json` for Docker-based hosting and `docker-compose.yml` for local testing. GitHub Pages cannot run the Spring Boot backend or MySQL database.
+
 ## Container deployment
 
 Docker and Docker Compose are supported for a local or staging deployment.
