@@ -52,7 +52,7 @@ public class CustomerController {
     }
     @GetMapping("/api/customers/search") @ResponseBody
     public CustomerDTO searchByPhone(@RequestParam String phone) { return service.getCustomerByPhone(phone); }
-    @GetMapping("/delete/{id}") public String delete(@PathVariable Long id) {
+    @PostMapping("/delete/{id}") public String delete(@PathVariable Long id) {
         service.deleteCustomer(id); return "redirect:/customers";
     }
 }
