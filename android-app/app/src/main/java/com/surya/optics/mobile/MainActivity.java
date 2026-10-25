@@ -24,7 +24,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.graphics.Color;
 import android.view.Gravity;
-import android.view.inputmethod.InputType;
+import android.text.InputType;
 import android.content.SharedPreferences;
 
 /** Android client for the existing Surya Optics Spring Boot web application. */
