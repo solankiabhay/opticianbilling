@@ -6,7 +6,7 @@ Optical shop billing application built with Spring Boot, Spring Security, Thymel
 
 - **Customer management:** create, edit, search, view profile, age field (optional, 0–130), purchase history and prescription history.
 - **Prescriptions:** create, edit, list and view prescriptions; positive SPH/CYL/ADD display values include a leading plus sign.
-- **Invoices:** create invoices with optical services and additional charges, automatic total/advance/balance calculations, delivery date, customer invoice history, status and printable invoice view.
+- **Invoices:** create invoices with one inventory product line plus manual subtotal and optical-service/additional charges, automatic total/advance/balance calculations, delivery date, customer invoice history, status and printable invoice view. Product stock is deducted transactionally when invoiced.
 - **Payments:** accept follow-up/partial payments, prevent zero/negative or over-balance payments, update invoice status and persist individual payment receipts in bill_payments.
 - **Inventory:** product CRUD, unique SKU validation, stock adjustments, active/inactive state, selling/purchase prices and low-stock alerts.
 - **Dashboard:** customer/invoice counts, billed value, received value, outstanding balance, low-stock alert count and recent invoices.
@@ -40,6 +40,7 @@ The project currently uses spring.jpa.hibernate.ddl-auto=update for convenience.
 
 - database/migrations/20261025_add_customer_age.sql
 - database/migrations/20261025_add_inventory_and_payments.sql
+- database/migrations/20261025_add_invoice_line_items.sql
 
 Back up the database before applying schema changes. Check the existing schema and constraints first; do not run a migration blindly on a production database.
 
@@ -49,7 +50,7 @@ The APK is a WebView client for a deployed backend; it does not bundle Spring Bo
 
 ## Important limitations before production
 
-- Invoice totals currently use a subtotal plus named optical-service/additional-charge fields; inventory products are not yet added as line items to an invoice and stock is not automatically deducted on sale.
+- The invoice UI currently supports one inventory product line per invoice plus a manual subtotal; adding multiple distinct inventory products on one invoice remains future work.
 - Payment history records the amount, method, timestamp and an initial-payment note; it is not a payment gateway integration.
 - CSV export covers invoice summaries, not a full accounting ledger.
 - Unit tests do not verify every rendered Thymeleaf page or live MySQL migration. Run browser QA with a disposable database and test Android against a real HTTPS deployment.
