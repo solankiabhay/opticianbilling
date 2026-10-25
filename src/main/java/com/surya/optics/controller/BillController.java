@@ -30,7 +30,7 @@ public class BillController {
         try{service.create(dto);return "redirect:/bills";}
         catch(IllegalArgumentException ex){model.addAttribute("bill",dto);model.addAttribute("customers",customers.getAllCustomers());model.addAttribute("error",ex.getMessage());return "bills/add";}
     }
-    @GetMapping("/view/{id}") public String view(@PathVariable Long id,Model model){model.addAttribute("bill",service.findById(id));return "bills/view";}
+    @GetMapping("/view/{id}") public String view(@PathVariable Long id,Model model){model.addAttribute("bill",service.findById(id));model.addAttribute("payments",service.findPayments(id));return "bills/view";}
     @PostMapping("/payment/{id}") public String payment(@PathVariable Long id,@RequestParam BigDecimal amount,@RequestParam(required=false) String paymentMode,Model model){
         try { service.recordPayment(id,amount,paymentMode); return "redirect:/bills/view/"+id; }
         catch(IllegalArgumentException ex) { model.addAttribute("bill",service.findById(id)); model.addAttribute("paymentError",ex.getMessage()); return "bills/view"; }
