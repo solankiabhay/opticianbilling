@@ -59,6 +59,6 @@ public class BillController {
         if(value==null)return "";
         String safe=value.replace("\r"," ").replace("\n"," ");
         if(safe.startsWith("=")||safe.startsWith("+")||safe.startsWith("-")||safe.startsWith("@")) safe="'"+safe;
-        return "\""+safe.replace("\"","\\"")+"\"";
+        return "\"" + safe.replace("\"", "\"\"") + "\"";
     }
 }
