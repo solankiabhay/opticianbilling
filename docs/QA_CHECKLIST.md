@@ -17,6 +17,8 @@ Run against a disposable MySQL database and a test-only account. Do not use real
 
 ## Inventory and invoice
 - [ ] Create a product with a unique SKU; attempt the same SKU with different letter case and confirm rejection.
+- [ ] Add two different inventory products to one invoice and verify the total uses server-side selling prices.
+- [ ] Add the same product on two rows and confirm quantities are aggregated for stock validation and deduction.
 - [ ] Set stock to 5, invoice quantity 2, and verify invoice total uses the server-side selling price.
 - [ ] Confirm product stock changes from 5 to 3 and the invoice snapshot shows name, SKU, quantity and unit price.
 - [ ] Try quantity above available stock and verify no invoice or stock change is committed.
@@ -40,4 +42,4 @@ Run against a disposable MySQL database and a test-only account. Do not use real
 - [ ] Latest Java CI workflow run is green on the exact commit to be released.
 - [ ] Database migrations are reviewed and applied to a staging database after backup.
 - [ ] HTTPS, least-privilege database credentials, backups, logging and monitoring are configured.
-- [ ] Production owner accepts the known limitation: current invoice UI supports one inventory product line plus manual subtotal, not multiple distinct product rows.
+- [ ] Confirm the latest Java CI run is green after multi-item invoice changes.
