@@ -6,6 +6,9 @@ import com.surya.optics.entity.Customer;
 import com.surya.optics.repository.BillRepository;
 import com.surya.optics.repository.CustomerRepository;
 import com.surya.optics.repository.PaymentRepository;
+import com.surya.optics.repository.ProductRepository;
+import com.surya.optics.repository.BillItemRepository;
+import com.surya.optics.entity.Product;
 import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -17,7 +20,9 @@ class BillServiceTest {
     private final BillRepository bills = mock(BillRepository.class);
     private final CustomerRepository customers = mock(CustomerRepository.class);
     private final PaymentRepository payments = mock(PaymentRepository.class);
-    private final BillService service = new BillService(bills, customers, payments);
+    private final ProductRepository products = mock(ProductRepository.class);
+    private final BillItemRepository billItems = mock(BillItemRepository.class);
+    private final BillService service = new BillService(bills, customers, payments, products, billItems);
 
     @Test
     void calculatesTotalAndOutstandingBalance() {
@@ -73,5 +78,33 @@ class BillServiceTest {
         when(bills.findByIdWithCustomer(9L)).thenReturn(Optional.of(bill));
         assertThrows(IllegalArgumentException.class, () -> service.recordPayment(9L, new BigDecimal("61.00"), "UPI"));
         assertThrows(IllegalArgumentException.class, () -> service.recordPayment(9L, BigDecimal.ZERO, "UPI"));
+    }
+
+    @Test
+    void addsInventoryProductToInvoiceAndDeductsStock() {
+        when(customers.findById(5L)).thenReturn(Optional.of(new Customer()));
+        Product product = new Product(); product.setId(7L); product.setName("Metal Frame");
+        product.setSku("FR-7"); product.setActive(true); product.setStockQuantity(10);
+        product.setSellingPrice(new BigDecimal("250.00"));
+        when(products.findById(7L)).thenReturn(Optional.of(product));
+        when(bills.save(any(Bill.class))).thenAnswer(invocation -> { Bill b=invocation.getArgument(0); b.setId(11L); return b; });
+        BillFormDTO dto = new BillFormDTO(); dto.setCustomerId(5L); dto.setProductId(7L); dto.setQuantity(2);
+        dto.setSubtotal(BigDecimal.ZERO);
+        Bill saved=service.create(dto);
+        assertEquals(new BigDecimal("500.00"),saved.getTotal());
+        assertEquals(8,product.getStockQuantity());
+        verify(billItems).save(any(com.surya.optics.entity.BillItem.class));
+        verify(products).save(product);
+    }
+
+    @Test
+    void rejectsInvoiceQuantityAboveAvailableStock() {
+        when(customers.findById(5L)).thenReturn(Optional.of(new Customer()));
+        Product product = new Product(); product.setId(7L); product.setName("Metal Frame");
+        product.setActive(true); product.setStockQuantity(1); product.setSellingPrice(new BigDecimal("250.00"));
+        when(products.findById(7L)).thenReturn(Optional.of(product));
+        BillFormDTO dto = new BillFormDTO(); dto.setCustomerId(5L); dto.setProductId(7L); dto.setQuantity(2);
+        assertThrows(IllegalArgumentException.class, () -> service.create(dto));
+        verify(bills, never()).save(any(Bill.class));
     }
 }
