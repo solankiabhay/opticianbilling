@@ -44,7 +44,7 @@ public class ProductService {
         if(next<0||next>Integer.MAX_VALUE)throw new IllegalArgumentException("Stock cannot become negative or exceed supported quantity");
         p.setStockQuantity((int)next);return products.save(p);
     }
-    @Transactional public void deactivate(Long id){Product p=find(id);p.setActive(false);products.save(p);}
+    @Transactional public void deactivate(Long id){Product p=products.findByIdForUpdate(id).orElseThrow(()->new IllegalArgumentException("Product not found"));p.setActive(false);products.save(p);}
     @Transactional(readOnly=true) public long lowStockCount(){return products.findAllByOrderByNameAsc().stream().filter(Product::isActive).filter(p->p.getStockQuantity()<=p.getReorderLevel()).count();}
     private void validate(Product p){
         if(p.getName()==null||p.getName().trim().isEmpty())throw new IllegalArgumentException("Product name is required");
