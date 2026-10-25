@@ -14,3 +14,8 @@ The source is a Spring Boot web application with a MySQL database, not a native 
 4. Build > Build APK(s). The APK is written under `app/build/outputs/apk/`.
 
 The Android client supports session cookies, file selection for uploads, downloads, back navigation, progress display and server URL configuration. Configure `DB_USERNAME` and `DB_PASSWORD` as environment variables on the backend; do not deploy with default or blank credentials.
+
+
+## CI output
+
+The repository workflow builds a debug APK and publishes it as a GitHub Actions artifact. A release-ready Play Store APK must be signed separately with a protected release keystore.
