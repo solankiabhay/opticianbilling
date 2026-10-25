@@ -65,7 +65,7 @@ class BillControllerTest {
         when(bills.findAll()).thenReturn(Collections.singletonList(bill));
 
         MockHttpServletResponse response = new MockHttpServletResponse();
-        new BillController(bills, customers, products).exportCsv(response);
+        new BillController(bills, customers, products, pdfs).exportCsv(response);
         String csv = response.getContentAsString();
 
         assertTrue(csv.contains("\"'   =HYPERLINK(\"\"https://attacker.example\"\")\""));
