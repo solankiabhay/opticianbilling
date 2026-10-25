@@ -1,0 +1,47 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: surya_optics
+      MYSQL_USER: ${DB_USERNAME:-surya_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - backend
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PORT: 8080
+      DB_URL: jdbc:mysql://mysql:3306/surya_optics?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: ${DB_USERNAME:-surya_app}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      APP_USER: ${APP_USER:-admin}
+      APP_PASSWORD: ${APP_PASSWORD:?Set APP_PASSWORD in .env}
+      LOG_FILE: /tmp/surya-optics.log
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    networks:
+      - backend
+
+volumes:
+  mysql_data:
+
+networks:
+  backend:
+    driver: bridge
