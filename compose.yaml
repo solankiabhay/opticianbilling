@@ -28,7 +28,7 @@ services:
       - "${PORT:-8080}:8080"
     environment:
       PORT: 8080
-      DB_URL: jdbc:mysql://db:3306/surya_optics?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_URL: "jdbc:mysql://db:3306/surya_optics?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
       DB_USERNAME: ${DB_USERNAME:-surya_app}
       DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
       APP_USER: ${APP_USER:-admin}
