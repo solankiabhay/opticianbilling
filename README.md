@@ -12,7 +12,7 @@ Optical shop billing application built with Spring Boot, Spring Security, Thymel
 - **Inventory:** product CRUD, unique SKU validation, stock adjustments, active/inactive state, selling/purchase prices and low-stock alerts.
 - **Dashboard:** customer/invoice counts, billed value, received value, outstanding balance, low-stock alert count and recent invoices.
 - **Reports:** date-filtered invoice totals, receipts and balances; invoice CSV export with spreadsheet-formula injection protection, and PDF invoice downloads.
-- **Quality checks:** Java CI runs Maven verification (tests plus packaging) on pushes and pull requests, then publishes the executable Spring Boot JAR as a workflow artifact.
+- **Quality checks:** Java CI validates Docker Compose, runs Maven verification (tests plus packaging), builds a Docker image on pushes and pull requests, then publishes the executable Spring Boot JAR as a workflow artifact.
 - **Android client:** Android WebView wrapper with server URL configuration; the debug APK is built by GitHub Actions.
 
 ## Repository and CI
