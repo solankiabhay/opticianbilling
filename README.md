@@ -6,11 +6,11 @@ Optical shop billing application built with Spring Boot, Spring Security, Thymel
 
 - **Customer management:** create, edit, search, view profile, age field (optional, 0–130), purchase history and prescription history.
 - **Prescriptions:** create, edit, list and view prescriptions; positive SPH/CYL/ADD display values include a leading plus sign.
-- **Invoices:** create invoices with multiple inventory product lines plus manual subtotal and optical-service/additional charges, automatic total/advance/balance calculations, delivery date, customer invoice history, status and printable invoice view. Product stock is deducted transactionally when invoiced, with row locks to avoid concurrent overselling.
+- **Invoices:** create invoices with multiple inventory product lines plus manual subtotal and optical-service/additional charges, automatic total/advance/balance calculations, delivery date, customer invoice history, status, printable invoice view and downloadable PDF receipts. Product stock is deducted transactionally when invoiced, with row locks to avoid concurrent overselling.
 - **Payments:** accept follow-up/partial payments, prevent zero/negative or over-balance payments, update invoice status and persist individual payment receipts in bill_payments.
 - **Inventory:** product CRUD, unique SKU validation, stock adjustments, active/inactive state, selling/purchase prices and low-stock alerts.
 - **Dashboard:** customer/invoice counts, billed value, received value, outstanding balance, low-stock alert count and recent invoices.
-- **Reports:** date-filtered invoice totals, receipts and balances; invoice CSV export with spreadsheet-formula injection protection.
+- **Reports:** date-filtered invoice totals, receipts and balances; invoice CSV export with spreadsheet-formula injection protection, and PDF invoice downloads.
 - **Quality checks:** Java CI runs Maven unit tests on pushes and pull requests.
 - **Android client:** Android WebView wrapper with server URL configuration; the debug APK is built by GitHub Actions.
 
