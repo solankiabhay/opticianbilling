@@ -7,6 +7,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class BillFormDTO {
     private Long id;
     private Long customerId;
+    private Long productId;
+    private Integer quantity = 1;
     @DateTimeFormat(pattern="yyyy-MM-dd") private LocalDate billDate;
     private BigDecimal subtotal = BigDecimal.ZERO;
     private String contactLensName;
@@ -22,6 +24,8 @@ public class BillFormDTO {
     private String notes;
     public Long getId(){return id;} public void setId(Long v){id=v;}
     public Long getCustomerId(){return customerId;} public void setCustomerId(Long v){customerId=v;}
+    public Long getProductId(){return productId;} public void setProductId(Long v){productId=v;}
+    public Integer getQuantity(){return quantity;} public void setQuantity(Integer v){quantity=v;}
     public LocalDate getBillDate(){return billDate;} public void setBillDate(LocalDate v){billDate=v;}
     public BigDecimal getSubtotal(){return subtotal;} public void setSubtotal(BigDecimal v){subtotal=v;}
     public String getContactLensName(){return contactLensName;} public void setContactLensName(String v){contactLensName=v;}
