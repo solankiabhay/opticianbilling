@@ -53,7 +53,7 @@ public class BillService {
         if(advance.compareTo(total)>0)throw new IllegalArgumentException("Advance cannot exceed bill total");
         if(d.getDeliveryDays()!=null&&(d.getDeliveryDays()<0||d.getDeliveryDays()>365))throw new IllegalArgumentException("Delivery days must be between 0 and 365");
         Bill b=new Bill();b.setCustomer(customer);b.setBillDate(d.getBillDate()==null?LocalDate.now():d.getBillDate());
-        b.setBillNumber("INV-"+System.currentTimeMillis());b.setSubtotal(subtotal.add(productLineTotal));b.setTotal(total);
+        b.setBillNumber("INV-"+System.currentTimeMillis());b.setSubtotal(subtotal);b.setTotal(total);
         b.setAdvance(advance);b.setBalance(total.subtract(advance));b.setContactLensName(d.getContactLensName());
         b.setContactLensCharges(contact);b.setSunglassName(d.getSunglassName());b.setSunglassCharges(sunglasses);
         b.setEyeTestingCharges(eyeTesting);b.setOtherCharges(other);b.setGlassType(d.getGlassType());
