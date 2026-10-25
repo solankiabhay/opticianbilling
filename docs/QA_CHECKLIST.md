@@ -27,6 +27,7 @@ Run against a disposable MySQL database and a test-only account. Do not use real
 
 ## Payments and reporting
 - [ ] Create an invoice with an initial advance and confirm a payment receipt is stored.
+- [ ] Download an invoice PDF and verify customer, line items, totals, payments and balance appear.
 - [ ] Record a partial payment, then the remaining balance; verify the status transitions PENDING → PAID.
 - [ ] Verify zero, negative and over-balance payments are rejected.
 - [ ] Filter reports by date boundaries and verify billed/received/outstanding totals.
