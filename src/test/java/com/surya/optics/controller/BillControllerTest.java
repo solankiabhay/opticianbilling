@@ -97,4 +97,25 @@ class BillControllerTest {
         verify(pdfs).write(eq(bill), anyList(), anyList(), any(OutputStream.class));
     }
 
+    @Test
+    void pdfEndpointSetsDownloadHeadersAndDelegatesPdfRendering() throws Exception {
+        BillService bills = mock(BillService.class);
+        CustomerService customers = mock(CustomerService.class);
+        ProductService products = mock(ProductService.class);
+        InvoicePdfService pdfs = mock(InvoicePdfService.class);
+        Bill bill = new Bill();
+        bill.setId(42L);
+        bill.setBillNumber("INV-TEST-42");
+        when(bills.findById(42L)).thenReturn(bill);
+        when(bills.findItems(42L)).thenReturn(Collections.emptyList());
+        when(bills.findPayments(42L)).thenReturn(Collections.emptyList());
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        new BillController(bills, customers, products, pdfs).exportPdf(42L, response);
+
+        assertEquals("application/pdf", response.getContentType());
+        assertEquals("attachment; filename=invoice-INV-TEST-42.pdf", response.getHeader("Content-Disposition"));
+        verify(pdfs).write(eq(bill), anyList(), anyList(), any(java.io.OutputStream.class));
+    }
+
 }
