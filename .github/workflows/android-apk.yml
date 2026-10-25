@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "android-app/**"
+      - "src/main/resources/templates/**"
       - ".github/workflows/android-apk.yml"
   workflow_dispatch:
 
