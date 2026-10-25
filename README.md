@@ -12,7 +12,7 @@ Optical shop billing application built with Spring Boot, Spring Security, Thymel
 - **Inventory:** product CRUD, unique SKU validation, stock adjustments, active/inactive state, selling/purchase prices and low-stock alerts.
 - **Dashboard:** customer/invoice counts, billed value, received value, outstanding balance, low-stock alert count and recent invoices.
 - **Reports:** date-filtered invoice totals, receipts and balances; invoice CSV export with spreadsheet-formula injection protection, and PDF invoice downloads.
-- **Quality checks:** Java CI runs Maven unit tests on pushes and pull requests.
+- **Quality checks:** Java CI runs Maven verification (tests plus packaging) on pushes and pull requests, then publishes the executable Spring Boot JAR as a workflow artifact.
 - **Android client:** Android WebView wrapper with server URL configuration; the debug APK is built by GitHub Actions.
 
 ## Repository and CI
@@ -21,7 +21,7 @@ Optical shop billing application built with Spring Boot, Spring Security, Thymel
 - Java CI: [workflow runs](https://github.com/solankiabhay/opticianbilling/actions/workflows/java-ci.yml)
 - Android build: [workflow runs](https://github.com/solankiabhay/opticianbilling/actions/workflows/android-apk.yml)
 
-The Java CI run for each latest commit should be checked before release. A passing unit-test build does not replace manual browser/mobile QA against a real MySQL database.
+The Java CI run for each latest commit should be checked before release. Download the `surya-optics-application-jar` artifact from a successful run to obtain the packaged backend. A passing unit-test build does not replace manual browser/mobile QA against a real MySQL database.
 
 ## Setup
 
