@@ -40,6 +40,12 @@ Run against a disposable MySQL database and a test-only account. Do not use real
 - [ ] Build the debug APK from GitHub Actions, configure an HTTPS backend URL, log in, and test navigation.
 - [ ] Verify app behavior with slow/unavailable network and server session expiry.
 
+## Container deployment
+- [ ] Copy `.env.example` to `.env` and replace every password placeholder with unique strong values.
+- [ ] Run `docker compose config` and `docker compose up --build -d`; verify the database health check completes before the app starts.
+- [ ] Sign in through `http://localhost:8080`, create a test invoice, download its PDF, and verify the data persists after restarting the app container.
+- [ ] Confirm the MySQL service is not exposed on a public host port and the `mysql_data` volume is retained after `docker compose down`.
+
 ## Release gate
 - [ ] Latest Java CI workflow run is green on the exact commit to be released.
 - [ ] Database migrations are reviewed and applied to a staging database after backup.
