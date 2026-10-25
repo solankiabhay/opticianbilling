@@ -4,7 +4,8 @@
 <div th:replace="layout/sidebar :: sidebar"></div><div class="main-content"><div th:replace="layout/navbar :: navbar"></div>
 <div class="container-fluid p-4"><div class="row mb-4"><div class="col-12"><h3 class="fw-bold">Edit Customer</h3><p class="text-muted">Update customer information</p></div></div>
 <div class="row"><div class="col-md-8 mx-auto"><div class="card shadow-sm"><div class="card-header bg-warning text-white"><h5 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Customer: <span th:text="${customer.name}"></span></h5></div>
-<div class="card-body"><form th:action="@{/customers/update/{id}(id=${customer.id})}" method="post" id="customerForm">
+<div class="card-body">
+<div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}"></div><form th:action="@{/customers/update/{id}(id=${customer.id})}" method="post" id="customerForm">
 <h6 class="fw-bold mb-3"><i class="fas fa-user me-2 text-primary"></i>Personal Details</h6>
 <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Full Name <span class="text-danger">*</span></label><input type="text" class="form-control" name="name" th:value="${customer.name}" required></div><div class="col-md-6 mb-3"><label class="form-label">Phone Number <span class="text-danger">*</span></label><input type="tel" class="form-control" name="phone" th:value="${customer.phone}" required pattern="[0-9]{10}"></div></div>
 <div class="row"><div class="col-md-6 mb-3"><label class="form-label">Email Address</label><input type="email" class="form-control" name="email" th:value="${customer.email}"></div><div class="col-md-6 mb-3"><label class="form-label">Customer Code</label><input type="text" class="form-control" th:value="${customer.customerCode}" disabled></div></div>
