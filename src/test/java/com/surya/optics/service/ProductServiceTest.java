@@ -46,4 +46,13 @@ class ProductServiceTest {
         assertFalse(saved.isActive());
     }
 
+    @Test void deactivationLocksTheProductRow(){
+        Product existing=product();existing.setId(2L);existing.setActive(true);
+        when(repository.findByIdForUpdate(2L)).thenReturn(java.util.Optional.of(existing));
+        when(repository.save(any(Product.class))).thenAnswer(i->i.getArgument(0));
+        service.deactivate(2L);
+        assertFalse(existing.isActive());
+        verify(repository).findByIdForUpdate(2L);
+    }
+
 }
