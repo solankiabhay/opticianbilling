@@ -1,16 +1,115 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"><head th:replace="layout/header :: header"></head><body>
-<div th:replace="layout/sidebar :: sidebar"></div><div class="main-content"><div th:replace="layout/navbar :: navbar"></div><div class="container-fluid p-4">
-<div class="mb-4"><h3 class="fw-bold">Create invoice</h3><p class="text-muted mb-0">Create a customer invoice with optical services and additional charges</p></div>
-<div class="card shadow-sm"><div class="card-body p-4"><div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
-<form method="post" th:action="@{/bills/save}" th:object="${bill}" id="invoiceForm">
-<div class="row g-3"><div class="col-md-6"><label class="form-label">Customer *</label><select class="form-select" th:field="*{customerId}" required><option value="">Select customer</option><option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.name + ' — ' + c.phone}"></option></select></div><div class="col-md-3"><label class="form-label">Bill date</label><input class="form-control" type="date" th:field="*{billDate}"></div><div class="col-md-3"><label class="form-label">Lens type</label><input class="form-control" th:field="*{glassType}" maxlength="50"></div>
-<div class="col-md-6"><label class="form-label">Inventory product</label><select class="form-select" id="productId" th:field="*{productId}"><option value="">No inventory product selected</option><option th:each="p : ${products}" th:value="${p.id}" th:attr="data-price=${p.sellingPrice},data-stock=${p.stockQuantity}" th:text="${p.name + ' — ' + p.sku + ' | ₹' + p.sellingPrice + ' | stock: ' + p.stockQuantity}"></option></select><div class="form-text" id="stockHint">Select a product to include it on this invoice.</div></div><div class="col-md-2"><label class="form-label">Quantity</label><input class="form-control" id="quantity" type="number" min="1" max="10000" th:field="*{quantity}"></div><div class="col-md-4"><label class="form-label">Manual item subtotal (₹)</label><input class="form-control calc-charge" id="subtotal" type="number" min="0" step="0.01" th:field="*{subtotal}" required></div><div class="col-md-4"><label class="form-label">Contact lens name</label><input class="form-control" th:field="*{contactLensName}" maxlength="100"></div><div class="col-md-4"><label class="form-label">Contact lens charges (₹)</label><input class="form-control calc-charge" id="contactLensCharges" type="number" min="0" step="0.01" th:field="*{contactLensCharges}"></div>
-<div class="col-md-4"><label class="form-label">Sunglasses name</label><input class="form-control" th:field="*{sunglassName}" maxlength="100"></div><div class="col-md-4"><label class="form-label">Sunglasses charges (₹)</label><input class="form-control calc-charge" id="sunglassCharges" type="number" min="0" step="0.01" th:field="*{sunglassCharges}"></div><div class="col-md-4"><label class="form-label">Eye testing charges (₹)</label><input class="form-control calc-charge" id="eyeTestingCharges" type="number" min="0" step="0.01" th:field="*{eyeTestingCharges}"></div>
-<div class="col-md-4"><label class="form-label">Other charges (₹)</label><input class="form-control calc-charge" id="otherCharges" type="number" min="0" step="0.01" th:field="*{otherCharges}"></div><div class="col-md-4"><label class="form-label">Advance paid (₹)</label><input class="form-control" id="advance" type="number" min="0" step="0.01" th:field="*{advance}"></div><div class="col-md-4"><label class="form-label">Payment mode</label><select class="form-select" th:field="*{paymentMode}"><option value="">Select</option><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Other</option></select></div>
-<div class="col-md-4"><label class="form-label">Delivery in (days)</label><input class="form-control" type="number" min="0" max="365" th:field="*{deliveryDays}"></div><div class="col-12"><label class="form-label">Notes</label><textarea class="form-control" rows="3" th:field="*{notes}" maxlength="2000"></textarea></div>
-<div class="col-12"><div class="rounded bg-light p-3"><div class="d-flex justify-content-between"><span>Invoice total</span><strong id="previewTotal">₹0.00</strong></div><div class="d-flex justify-content-between mt-1"><span>Balance after advance</span><strong id="previewBalance">₹0.00</strong></div></div></div></div>
-<div class="d-flex justify-content-end gap-2 mt-3"><a class="btn btn-outline-secondary" th:href="@{/bills}">Cancel</a><button class="btn btn-primary" type="submit">Save invoice</button></div></form></div></div></div></div><div th:replace="layout/footer :: footer"></div>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/header :: header"></head>
+<body>
+<div th:replace="layout/sidebar :: sidebar"></div>
+<div class="main-content">
+  <div th:replace="layout/navbar :: navbar"></div>
+  <div class="container-fluid p-4">
+    <div class="mb-4"><h3 class="fw-bold">Create invoice</h3><p class="text-muted mb-0">Add multiple inventory items, optical services and additional charges</p></div>
+    <div class="card shadow-sm"><div class="card-body p-4">
+      <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+      <form method="post" th:action="@{/bills/save}" th:object="${bill}" id="invoiceForm">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Customer *</label><select class="form-select" th:field="*{customerId}" required><option value="">Select customer</option><option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.name + ' — ' + c.phone}"></option></select></div>
+          <div class="col-md-3"><label class="form-label">Bill date</label><input class="form-control" type="date" th:field="*{billDate}"></div>
+          <div class="col-md-3"><label class="form-label">Lens type</label><input class="form-control" th:field="*{glassType}" maxlength="50"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-2"><h5 class="mb-0">Inventory items</h5><button class="btn btn-sm btn-outline-primary" type="button" id="addProductRow"><i class="fa-solid fa-plus me-1"></i>Add item</button></div>
+        <div id="productRows">
+          <div class="row g-2 product-row align-items-end mb-2" th:each="i : ${#numbers.sequence(0, (#lists.isEmpty(bill.productIds) ? 1 : #lists.size(bill.productIds)) - 1)}">
+            <div class="col-md-7"><label class="form-label">Product</label><select class="form-select product-select" name="productIds"><option value="">No inventory product</option><option th:each="p : ${products}" th:value="${p.id}" th:attr="data-price=${p.sellingPrice},data-stock=${p.stockQuantity}" th:selected="${!#lists.isEmpty(bill.productIds) and p.id == bill.productIds[i]}" th:text="${p.name + ' — ' + p.sku + ' | ₹' + p.sellingPrice + ' | stock: ' + p.stockQuantity}"></option></select><div class="form-text stock-hint">Select an inventory product.</div></div>
+            <div class="col-md-2"><label class="form-label">Quantity</label><input class="form-control product-quantity" name="quantities" type="number" min="1" max="10000" th:value="${!#lists.isEmpty(bill.quantities) and i < #lists.size(bill.quantities) ? bill.quantities[i] : 1}"></div>
+            <div class="col-md-3"><button class="btn btn-outline-danger remove-product w-100" type="button"><i class="fa-solid fa-trash me-1"></i>Remove item</button></div>
+          </div>
+        </div>
+        <div class="row g-3 mt-1">
+          <div class="col-md-4"><label class="form-label">Manual item subtotal (₹)</label><input class="form-control calc-charge" id="subtotal" type="number" min="0" step="0.01" th:field="*{subtotal}" required></div>
+          <div class="col-md-4"><label class="form-label">Contact lens name</label><input class="form-control" th:field="*{contactLensName}" maxlength="100"></div>
+          <div class="col-md-4"><label class="form-label">Contact lens charges (₹)</label><input class="form-control calc-charge" id="contactLensCharges" type="number" min="0" step="0.01" th:field="*{contactLensCharges}"></div>
+          <div class="col-md-4"><label class="form-label">Sunglasses name</label><input class="form-control" th:field="*{sunglassName}" maxlength="100"></div>
+          <div class="col-md-4"><label class="form-label">Sunglasses charges (₹)</label><input class="form-control calc-charge" id="sunglassCharges" type="number" min="0" step="0.01" th:field="*{sunglassCharges}"></div>
+          <div class="col-md-4"><label class="form-label">Eye testing charges (₹)</label><input class="form-control calc-charge" id="eyeTestingCharges" type="number" min="0" step="0.01" th:field="*{eyeTestingCharges}"></div>
+          <div class="col-md-4"><label class="form-label">Other charges (₹)</label><input class="form-control calc-charge" id="otherCharges" type="number" min="0" step="0.01" th:field="*{otherCharges}"></div>
+          <div class="col-md-4"><label class="form-label">Advance paid (₹)</label><input class="form-control" id="advance" type="number" min="0" step="0.01" th:field="*{advance}"></div>
+          <div class="col-md-4"><label class="form-label">Payment mode</label><select class="form-select" th:field="*{paymentMode}"><option value="">Select</option><option>Cash</option><option>UPI</option><option>Card</option><option>Bank Transfer</option><option>Other</option></select></div>
+          <div class="col-md-4"><label class="form-label">Delivery in (days)</label><input class="form-control" type="number" min="0" max="365" th:field="*{deliveryDays}"></div>
+          <div class="col-12"><label class="form-label">Notes</label><textarea class="form-control" rows="3" th:field="*{notes}" maxlength="2000"></textarea></div>
+          <div class="col-12"><div class="rounded bg-light p-3"><div class="d-flex justify-content-between"><span>Invoice total</span><strong id="previewTotal">₹0.00</strong></div><div class="d-flex justify-content-between mt-1"><span>Balance after advance</span><strong id="previewBalance">₹0.00</strong></div></div></div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-3"><a class="btn btn-outline-secondary" th:href="@{/bills}">Cancel</a><button class="btn btn-primary" type="submit">Save invoice</button></div>
+      </form>
+    </div></div>
+  </div>
+</div>
+<div th:replace="layout/footer :: footer"></div>
 <script>
-(function(){const ids=['subtotal','contactLensCharges','sunglassCharges','eyeTestingCharges','otherCharges'];const product=document.getElementById('productId');const qty=document.getElementById('quantity');const money=n=>'₹'+n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});function update(){let total=ids.reduce((s,id)=>s+Math.max(0,Number(document.getElementById(id).value)||0),0);const opt=product.options[product.selectedIndex];const stock=opt&&opt.value?Number(opt.dataset.stock)||0:0;const price=opt&&opt.value?Number(opt.dataset.price)||0:0;const count=Math.max(1,Number(qty.value)||1);if(product.value){qty.max=stock;document.getElementById('stockHint').textContent='Unit price: '+money(price)+' · Available stock: '+stock;total+=price*count;}else{qty.removeAttribute('max');document.getElementById('stockHint').textContent='Select a product to include it on this invoice.';}let advance=Math.max(0,Number(document.getElementById('advance').value)||0);document.getElementById('previewTotal').textContent=money(total);document.getElementById('previewBalance').textContent=money(Math.max(0,total-advance));document.getElementById('advance').max=total;}document.querySelectorAll('.calc-charge,#advance,#quantity').forEach(el=>el.addEventListener('input',update));product.addEventListener('change',update);document.getElementById('invoiceForm').addEventListener('submit',function(e){let total=ids.reduce((s,id)=>s+Math.max(0,Number(document.getElementById(id).value)||0),0);const opt=product.options[product.selectedIndex];if(product.value)total+=(Number(opt.dataset.price)||0)*(Number(qty.value)||1);let advance=Number(document.getElementById('advance').value)||0;if(product.value&&(Number(qty.value)<1||Number(qty.value)>Number(opt.dataset.stock))){e.preventDefault();alert('Quantity must be within available stock.');return;}if(advance>total){e.preventDefault();alert('Advance cannot exceed the invoice total.');}});update();})();
-</script></body></html>
+(function(){
+  const rows=document.getElementById('productRows');
+  const money=n=>'₹'+n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const chargeIds=['subtotal','contactLensCharges','sunglassCharges','eyeTestingCharges','otherCharges'];
+  function update(){
+    let total=chargeIds.reduce((sum,id)=>sum+Math.max(0,Number(document.getElementById(id).value)||0),0);
+    const quantitiesById={};
+    rows.querySelectorAll('.product-row').forEach(row=>{
+      const select=row.querySelector('.product-select'), quantity=row.querySelector('.product-quantity'), hint=row.querySelector('.stock-hint');
+      const option=select.options[select.selectedIndex];
+      if(select.value){
+        const count=Math.max(1,Number(quantity.value)||1), price=Number(option.dataset.price)||0, stock=Number(option.dataset.stock)||0;
+        quantitiesById[select.value]=(quantitiesById[select.value]||0)+count;
+        total+=price*count;
+        quantity.max=stock;
+        hint.textContent='Unit price: '+money(price)+' · Stock: '+stock;
+      }else{quantity.removeAttribute('max');hint.textContent='Select an inventory product.';}
+    });
+    rows.querySelectorAll('.product-row').forEach(row=>{
+      const select=row.querySelector('.product-select');
+      if(select.value){
+        const option=select.options[select.selectedIndex], stock=Number(option.dataset.stock)||0;
+        if(quantitiesById[select.value]>stock) row.querySelector('.stock-hint').textContent='Combined quantity '+quantitiesById[select.value]+' exceeds stock '+stock+'.';
+      }
+    });
+    rows.querySelectorAll('.remove-product').forEach(button=>button.disabled=rows.querySelectorAll('.product-row').length===1);
+    const advance=Math.max(0,Number(document.getElementById('advance').value)||0);
+    document.getElementById('previewTotal').textContent=money(total);
+    document.getElementById('previewBalance').textContent=money(Math.max(0,total-advance));
+    document.getElementById('advance').max=total;
+  }
+  document.getElementById('addProductRow').addEventListener('click',()=>{
+    const clone=rows.querySelector('.product-row').cloneNode(true);
+    clone.querySelector('.product-select').selectedIndex=0;
+    clone.querySelector('.product-quantity').value=1;
+    clone.querySelector('.stock-hint').textContent='Select an inventory product.';
+    rows.appendChild(clone);update();
+  });
+  rows.addEventListener('click',event=>{
+    const button=event.target.closest('.remove-product');
+    if(button&&rows.querySelectorAll('.product-row').length>1){button.closest('.product-row').remove();update();}
+  });
+  rows.addEventListener('input',update);
+  rows.addEventListener('change',update);
+  document.querySelectorAll('.calc-charge,#advance').forEach(el=>el.addEventListener('input',update));
+  document.getElementById('invoiceForm').addEventListener('submit',event=>{
+    let total=chargeIds.reduce((sum,id)=>sum+Math.max(0,Number(document.getElementById(id).value)||0),0);
+    const totals={};let invalid=false;
+    rows.querySelectorAll('.product-row').forEach(row=>{
+      const select=row.querySelector('.product-select'), quantity=row.querySelector('.product-quantity');
+      if(!select.value)return;
+      const option=select.options[select.selectedIndex], qty=Number(quantity.value)||0, stock=Number(option.dataset.stock)||0;
+      totals[select.value]=(totals[select.value]||0)+qty;
+      total+=(Number(option.dataset.price)||0)*qty;
+      if(qty<1||qty>10000||totals[select.value]>stock) invalid=true;
+    });
+    rows.querySelectorAll('.product-row').forEach(row=>{
+      const select=row.querySelector('.product-select');
+      if(select.value&&totals[select.value]>(Number(select.options[select.selectedIndex].dataset.stock)||0)) invalid=true;
+    });
+    const advance=Number(document.getElementById('advance').value)||0;
+    if(invalid){event.preventDefault();alert('Check product quantities: they must be positive and within available stock.');return;}
+    if(advance<0||advance>total){event.preventDefault();alert('Advance cannot be negative or exceed the invoice total.');}
+  });
+  update();
+})();
+</script>
+</body>
+</html>
