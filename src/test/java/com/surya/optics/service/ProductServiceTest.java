@@ -24,7 +24,7 @@ class ProductServiceTest {
         submitted.setId(2L);
         submitted.setStockQuantity(99);
         when(repository.existsBySkuIgnoreCaseAndIdNot("FR-001", 2L)).thenReturn(false);
-        when(repository.findById(2L)).thenReturn(java.util.Optional.of(existing));
+        when(repository.findByIdForUpdate(2L)).thenReturn(java.util.Optional.of(existing));
         when(repository.save(any(Product.class))).thenAnswer(i -> i.getArgument(0));
 
         Product saved = service.save(submitted);
