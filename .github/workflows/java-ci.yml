@@ -20,6 +20,8 @@ jobs:
         run: docker compose --env-file .env.example config > /dev/null
       - name: Build and test
         run: mvn --batch-mode --no-transfer-progress verify
+      - name: Build Docker image
+        run: docker build --tag surya-optics:test .
       - name: Upload executable Spring Boot JAR
         uses: actions/upload-artifact@v4
         with:
