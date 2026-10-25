@@ -11,7 +11,7 @@ public class CustomerDTO {
     private String phone;
     private String email;
     @Min(value = 0, message = "Age cannot be negative")
-    @Max(value = 120, message = "Age must be 120 or below")
+    @Max(value = 130, message = "Age must be 130 or below")
     private Integer age;
     private String address;
     private String city;
