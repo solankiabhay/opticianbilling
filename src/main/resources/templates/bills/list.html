@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"><head th:replace="layout/header :: header"></head><body>
+<div th:replace="layout/sidebar :: sidebar"></div><div class="main-content"><div th:replace="layout/navbar :: navbar"></div><div class="container-fluid p-4">
+<div class="d-flex justify-content-between align-items-center mb-4"><div><h3 class="fw-bold">Bills & invoices</h3><p class="text-muted mb-0">Review invoices and outstanding balances</p></div><a class="btn btn-primary" th:href="@{/bills/add}"><i class="fa-solid fa-file-invoice me-2"></i>Create bill</a></div>
+<div class="card shadow-sm"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Total</th><th>Advance</th><th>Balance</th><th>Status</th><th></th></tr></thead><tbody>
+<tr th:each="b : ${bills}"><td class="fw-semibold" th:text="${b.billNumber}"></td><td><span th:text="${b.customer.name}"></span><br><small class="text-muted" th:text="${b.customer.phone}"></small></td><td th:text="${b.billDate}"></td><td th:text="'₹' + ${#numbers.formatDecimal(b.total,1,2)}"></td><td th:text="'₹' + ${#numbers.formatDecimal(b.advance,1,2)}"></td><td th:text="'₹' + ${#numbers.formatDecimal(b.balance,1,2)}"></td><td><span class="badge" th:classappend="${b.status == 'PAID' ? ' bg-success' : ' bg-warning text-dark'}" th:text="${b.status}"></span></td><td><a class="btn btn-sm btn-outline-primary" th:href="@{/bills/view/{id}(id=${b.id})}"><i class="fa-solid fa-eye"></i></a></td></tr>
+<tr th:if="${#lists.isEmpty(bills)}"><td colspan="8" class="text-center text-muted py-4">No invoices yet.</td></tr>
+</tbody></table></div></div></div></div><div th:replace="layout/footer :: footer"></div></body></html>
