@@ -2,6 +2,7 @@ package com.surya.optics.controller;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -12,7 +13,11 @@ class ClientTemplateSmokeTest {
     private String template(String path) throws IOException {
         try (InputStream stream = getClass().getClassLoader().getResourceAsStream("templates/" + path)) {
             if (stream == null) throw new AssertionError("Missing client template: " + path);
-            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int count;
+            while ((count = stream.read(buffer)) != -1) output.write(buffer, 0, count);
+            return new String(output.toByteArray(), StandardCharsets.UTF_8);
         }
     }
 
