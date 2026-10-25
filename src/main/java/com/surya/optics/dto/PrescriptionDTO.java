@@ -29,8 +29,7 @@ public class PrescriptionDTO {
 
     private String formatPower(BigDecimal value) {
         if (value == null) return "-";
-        BigDecimal normalized = value.stripTrailingZeros();
-        String text = normalized.toPlainString();
+        String text = value.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
         return value.signum() > 0 ? "+" + text : text;
     }
     private String formatPowerInput(BigDecimal value) {
