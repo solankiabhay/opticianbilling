@@ -107,4 +107,30 @@ class BillServiceTest {
         assertThrows(IllegalArgumentException.class, () -> service.create(dto));
         verify(bills, never()).save(any(Bill.class));
     }
+    @Test
+    void supportsMultipleProductsAndAggregatesDuplicateLinesSafely() {
+        when(customers.findById(5L)).thenReturn(Optional.of(new Customer()));
+        Product first = new Product(); first.setId(7L); first.setName("Metal Frame");
+        first.setSku("FR-7"); first.setActive(true); first.setStockQuantity(10);
+        first.setSellingPrice(new BigDecimal("250.00"));
+        Product second = new Product(); second.setId(8L); second.setName("Lens Cleaner");
+        second.setSku("CL-8"); second.setActive(true); second.setStockQuantity(4);
+        second.setSellingPrice(new BigDecimal("100.00"));
+        when(products.findByIdForUpdate(7L)).thenReturn(Optional.of(first));
+        when(products.findByIdForUpdate(8L)).thenReturn(Optional.of(second));
+        when(bills.save(any(Bill.class))).thenAnswer(invocation -> { Bill b=invocation.getArgument(0); b.setId(12L); return b; });
+
+        BillFormDTO dto = new BillFormDTO();
+        dto.setCustomerId(5L);
+        dto.setProductIds(java.util.Arrays.asList(7L, 8L, 7L));
+        dto.setQuantities(java.util.Arrays.asList(2, 1, 3));
+        dto.setSubtotal(new BigDecimal("50.00"));
+        Bill saved = service.create(dto);
+
+        assertEquals(new BigDecimal("1400.00"), saved.getTotal());
+        assertEquals(5, first.getStockQuantity());
+        assertEquals(3, second.getStockQuantity());
+        verify(billItems, times(2)).save(any(com.surya.optics.entity.BillItem.class));
+    }
+
 }
