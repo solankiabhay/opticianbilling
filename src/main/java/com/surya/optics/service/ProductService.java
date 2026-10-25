@@ -23,7 +23,7 @@ public class ProductService {
     }
     @Transactional public Product adjustStock(Long id,Integer delta){
         if(delta==null||delta==0)throw new IllegalArgumentException("Stock adjustment cannot be zero");
-        Product p=find(id);long next=(long)p.getStockQuantity()+delta;
+        Product p=products.findByIdForUpdate(id).orElseThrow(()->new IllegalArgumentException("Product not found"));long next=(long)p.getStockQuantity()+delta;
         if(next<0||next>Integer.MAX_VALUE)throw new IllegalArgumentException("Stock cannot become negative or exceed supported quantity");
         p.setStockQuantity((int)next);return products.save(p);
     }
