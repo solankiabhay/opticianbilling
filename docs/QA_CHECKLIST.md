@@ -7,6 +7,7 @@ Run against a disposable MySQL database and a test-only account. Do not use real
 - [ ] Confirm unauthenticated browser access redirects to login.
 - [ ] Sign in with APP_USER and verify logout ends the session.
 - [ ] Confirm startup fails when APP_PASSWORD is blank or too short.
+- [ ] Verify the branded login page renders, invalid credentials show a message, and logout returns to sign-in.
 
 ## Customers and prescriptions
 - [ ] Create a customer with no age, then with ages 0 and 130.
