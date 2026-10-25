@@ -57,7 +57,7 @@ class BillServiceTest {
         bill.setId(9L); bill.setTotal(new BigDecimal("1000.00"));
         bill.setAdvance(new BigDecimal("200.00")); bill.setBalance(new BigDecimal("800.00"));
         bill.setStatus("PENDING");
-        when(bills.findByIdWithCustomer(9L)).thenReturn(Optional.of(bill));
+        when(bills.findByIdForUpdate(9L)).thenReturn(Optional.of(bill));
         when(bills.save(any(Bill.class))).thenAnswer(invocation -> invocation.getArgument(0));
         Bill partial = service.recordPayment(9L, new BigDecimal("300.00"), "UPI");
         assertEquals(new BigDecimal("500.00"), partial.getBalance());
@@ -75,7 +75,7 @@ class BillServiceTest {
         Bill bill = new Bill();
         bill.setId(9L); bill.setTotal(new BigDecimal("100.00"));
         bill.setAdvance(new BigDecimal("40.00")); bill.setBalance(new BigDecimal("60.00"));
-        when(bills.findByIdWithCustomer(9L)).thenReturn(Optional.of(bill));
+        when(bills.findByIdForUpdate(9L)).thenReturn(Optional.of(bill));
         assertThrows(IllegalArgumentException.class, () -> service.recordPayment(9L, new BigDecimal("61.00"), "UPI"));
         assertThrows(IllegalArgumentException.class, () -> service.recordPayment(9L, BigDecimal.ZERO, "UPI"));
     }
@@ -86,7 +86,7 @@ class BillServiceTest {
         Product product = new Product(); product.setId(7L); product.setName("Metal Frame");
         product.setSku("FR-7"); product.setActive(true); product.setStockQuantity(10);
         product.setSellingPrice(new BigDecimal("250.00"));
-        when(products.findById(7L)).thenReturn(Optional.of(product));
+        when(products.findByIdForUpdate(7L)).thenReturn(Optional.of(product));
         when(bills.save(any(Bill.class))).thenAnswer(invocation -> { Bill b=invocation.getArgument(0); b.setId(11L); return b; });
         BillFormDTO dto = new BillFormDTO(); dto.setCustomerId(5L); dto.setProductId(7L); dto.setQuantity(2);
         dto.setSubtotal(BigDecimal.ZERO);
@@ -102,7 +102,7 @@ class BillServiceTest {
         when(customers.findById(5L)).thenReturn(Optional.of(new Customer()));
         Product product = new Product(); product.setId(7L); product.setName("Metal Frame");
         product.setActive(true); product.setStockQuantity(1); product.setSellingPrice(new BigDecimal("250.00"));
-        when(products.findById(7L)).thenReturn(Optional.of(product));
+        when(products.findByIdForUpdate(7L)).thenReturn(Optional.of(product));
         BillFormDTO dto = new BillFormDTO(); dto.setCustomerId(5L); dto.setProductId(7L); dto.setQuantity(2);
         assertThrows(IllegalArgumentException.class, () -> service.create(dto));
         verify(bills, never()).save(any(Bill.class));
