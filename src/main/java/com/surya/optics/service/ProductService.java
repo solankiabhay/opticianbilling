@@ -15,10 +15,27 @@ public class ProductService {
     @Transactional(readOnly=true) public List<Product> search(String q){return q==null||q.trim().isEmpty()?findAll():products.findByNameContainingIgnoreCaseOrSkuContainingIgnoreCaseOrderByNameAsc(q.trim(),q.trim());}
     @Transactional(readOnly=true) public Product find(Long id){return products.findById(id).orElseThrow(()->new IllegalArgumentException("Product not found"));}
     @Transactional public Product save(Product form){
-        validate(form);
+        if(form==null)throw new IllegalArgumentException("Product details are required");
         Product p;
-        if(form.getId()==null){p=form;}else{p=find(form.getId());p.setName(form.getName().trim());p.setSku(form.getSku().trim().toUpperCase());p.setCategory(form.getCategory());p.setBrand(form.getBrand());p.setPurchasePrice(form.getPurchasePrice());p.setSellingPrice(form.getSellingPrice());/* Preserve live stock during product edits; use the locked stock-adjustment action instead. */p.setReorderLevel(form.getReorderLevel());p.setDescription(form.getDescription());p.setActive(form.isActive());}
-        p.setName(p.getName().trim());p.setSku(p.getSku().trim().toUpperCase());
+        if(form.getId()==null){
+            validate(form);
+            p=form;
+        }else{
+            p=products.findByIdForUpdate(form.getId()).orElseThrow(()->new IllegalArgumentException("Product not found"));
+            validate(form);
+            p.setName(form.getName().trim());
+            p.setSku(form.getSku().trim().toUpperCase());
+            p.setCategory(form.getCategory());
+            p.setBrand(form.getBrand());
+            p.setPurchasePrice(form.getPurchasePrice());
+            p.setSellingPrice(form.getSellingPrice());
+            // Stock is changed only through the locked stock-adjustment action or invoice transaction.
+            p.setReorderLevel(form.getReorderLevel());
+            p.setDescription(form.getDescription());
+            p.setActive(form.isActive());
+        }
+        p.setName(p.getName().trim());
+        p.setSku(p.getSku().trim().toUpperCase());
         return products.save(p);
     }
     @Transactional public Product adjustStock(Long id,Integer delta){
@@ -35,7 +52,7 @@ public class ProductService {
         if(p.getName().trim().length()>120||p.getSku().trim().length()>40)throw new IllegalArgumentException("Name or SKU is too long");
         if(p.getPurchasePrice()==null||p.getPurchasePrice().compareTo(BigDecimal.ZERO)<0)throw new IllegalArgumentException("Purchase price cannot be negative");
         if(p.getSellingPrice()==null||p.getSellingPrice().compareTo(BigDecimal.ZERO)<0)throw new IllegalArgumentException("Selling price cannot be negative");
-        if(p.getStockQuantity()==null||p.getStockQuantity()<0)throw new IllegalArgumentException("Stock quantity cannot be negative");
+        if(p.getId()==null&&(p.getStockQuantity()==null||p.getStockQuantity()<0))throw new IllegalArgumentException("Stock quantity cannot be negative");
         if(p.getReorderLevel()==null||p.getReorderLevel()<0)throw new IllegalArgumentException("Reorder level cannot be negative");
         boolean duplicate=p.getId()==null?products.existsBySkuIgnoreCase(p.getSku().trim()):products.existsBySkuIgnoreCaseAndIdNot(p.getSku().trim(),p.getId());
         if(duplicate)throw new IllegalArgumentException("SKU already exists; choose a unique SKU");
