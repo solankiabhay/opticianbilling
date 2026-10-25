@@ -4,6 +4,7 @@ Optical shop billing application built with Spring Boot, Spring Security, Thymel
 
 ## Features currently implemented
 
+- **Authentication:** responsive branded sign-in page, BCrypt-encoded environment-provided admin password, authenticated routes and logout.
 - **Customer management:** create, edit, search, view profile, age field (optional, 0–130), purchase history and prescription history.
 - **Prescriptions:** create, edit, list and view prescriptions; positive SPH/CYL/ADD display values include a leading plus sign.
 - **Invoices:** create invoices with multiple inventory product lines plus manual subtotal and optical-service/additional charges, automatic total/advance/balance calculations, delivery date, customer invoice history, status, printable invoice view and downloadable PDF receipts. Product stock is deducted transactionally when invoiced, with row locks to avoid concurrent overselling.
