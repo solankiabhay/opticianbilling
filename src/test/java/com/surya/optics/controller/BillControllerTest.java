@@ -1,6 +1,10 @@
 package com.surya.optics.controller;
 
 import com.surya.optics.entity.Bill;
+import com.surya.optics.entity.Customer;
+import java.time.LocalDate;
+import java.util.Collections;
+import org.springframework.mock.web.MockHttpServletResponse;
 import com.surya.optics.service.BillService;
 import com.surya.optics.service.CustomerService;
 import com.surya.optics.service.ProductService;
@@ -41,4 +45,31 @@ class BillControllerTest {
         verify(bills).findPayments(7L);
         verify(bills).findItems(7L);
     }
+    @Test
+    void csvExportNeutralizesFormulaInjectionAfterLeadingWhitespace() throws Exception {
+        BillService bills = mock(BillService.class);
+        CustomerService customers = mock(CustomerService.class);
+        ProductService products = mock(ProductService.class);
+        Customer customer = new Customer();
+        customer.setName("   =HYPERLINK(\"https://attacker.example\")");
+        customer.setPhone("+123456789");
+        Bill bill = new Bill();
+        bill.setBillNumber("INV-1");
+        bill.setCustomer(customer);
+        bill.setBillDate(LocalDate.of(2026, 10, 25));
+        bill.setTotal(new BigDecimal("100.00"));
+        bill.setAdvance(new BigDecimal("20.00"));
+        bill.setBalance(new BigDecimal("80.00"));
+        bill.setStatus("PENDING");
+        bill.setPaymentMode("UPI");
+        when(bills.findAll()).thenReturn(Collections.singletonList(bill));
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        new BillController(bills, customers, products).exportCsv(response);
+        String csv = response.getContentAsString();
+
+        assertTrue(csv.contains("\"'   =HYPERLINK(\"\"https://attacker.example\"\")\""));
+        assertTrue(csv.contains("\"'+123456789\""));
+    }
+
 }
