@@ -14,6 +14,7 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
     List<Bill> findAllByOrderByBillDateDesc();
     @Query("SELECT b FROM Bill b JOIN FETCH b.customer WHERE b.id = :id")
     Optional<Bill> findByIdWithCustomer(@Param("id") Long id);
-    List<Bill> findByCustomerIdOrderByBillDateDesc(Long customerId);
+    @Query("SELECT b FROM Bill b JOIN FETCH b.customer WHERE b.customer.id = :customerId ORDER BY b.billDate DESC")
+    List<Bill> findByCustomerIdOrderByBillDateDesc(@Param("customerId") Long customerId);
     long countByCustomerId(Long customerId);
 }
