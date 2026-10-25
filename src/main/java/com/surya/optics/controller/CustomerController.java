@@ -43,12 +43,7 @@ public class CustomerController {
         return "customers/view";
     }
     @GetMapping("/history/{id}") public String history(@PathVariable Long id, Model model) {
-        model.addAttribute("customer", service.getCustomerById(id));
-        model.addAttribute("bills", Collections.emptyList());
-        model.addAttribute("prescriptions", Collections.emptyList());
-        model.addAttribute("totalSpent", BigDecimal.ZERO);
-        model.addAttribute("averageBill", 0.0);
-        return "customers/history";
+        return "redirect:/customers/view/" + id;
     }
     @GetMapping("/search") public String search(@RequestParam(required=false) String keyword, Model model) {
         model.addAttribute("customers", service.searchCustomers(keyword));
