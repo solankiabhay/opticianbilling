@@ -8,6 +8,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import com.surya.optics.service.BillService;
 import com.surya.optics.service.CustomerService;
 import com.surya.optics.service.ProductService;
+import com.surya.optics.service.InvoicePdfService;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ class BillControllerTest {
         BillService bills = mock(BillService.class);
         CustomerService customers = mock(CustomerService.class);
         ProductService products = mock(ProductService.class);
+        InvoicePdfService pdfs = mock(InvoicePdfService.class);
         Bill bill = new Bill();
         bill.setId(7L);
         bill.setTotal(new BigDecimal("100.00"));
@@ -34,7 +36,7 @@ class BillControllerTest {
         when(bills.findPayments(7L)).thenReturn(Collections.emptyList());
         when(bills.findItems(7L)).thenReturn(Collections.emptyList());
 
-        MockMvc mvc = MockMvcBuilders.standaloneSetup(new BillController(bills, customers, products)).build();
+        MockMvc mvc = MockMvcBuilders.standaloneSetup(new BillController(bills, customers, products, pdfs)).build();
         mvc.perform(post("/bills/payment/7").param("amount", "61.00").param("paymentMode", "UPI"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("bills/view"))
