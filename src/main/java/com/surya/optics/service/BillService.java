@@ -43,7 +43,7 @@ public class BillService {
         Product selectedProduct=null; BigDecimal productLineTotal=BigDecimal.ZERO; Integer quantity=d.getQuantity()==null?1:d.getQuantity();
         if(d.getProductId()!=null){
             if(quantity<1||quantity>10000)throw new IllegalArgumentException("Product quantity must be between 1 and 10000");
-            selectedProduct=products.findById(d.getProductId()).orElseThrow(()->new IllegalArgumentException("Selected product was not found"));
+            selectedProduct=products.findByIdForUpdate(d.getProductId()).orElseThrow(()->new IllegalArgumentException("Selected product was not found"));
             if(!selectedProduct.isActive())throw new IllegalArgumentException("Selected product is inactive");
             if(selectedProduct.getStockQuantity()<quantity)throw new IllegalArgumentException("Insufficient stock for "+selectedProduct.getName()+"; available: "+selectedProduct.getStockQuantity());
             productLineTotal=selectedProduct.getSellingPrice().multiply(BigDecimal.valueOf(quantity));
@@ -66,7 +66,7 @@ public class BillService {
     }
 
     @Transactional public Bill recordPayment(Long billId,BigDecimal amount,String paymentMode) {
-        Bill bill=findById(billId);BigDecimal paymentAmount=nonNegative(amount,"Payment amount");
+        Bill bill=bills.findByIdForUpdate(billId).orElseThrow(()->new IllegalArgumentException("Bill not found: "+billId));BigDecimal paymentAmount=nonNegative(amount,"Payment amount");
         if(paymentAmount.compareTo(BigDecimal.ZERO)<=0)throw new IllegalArgumentException("Payment amount must be greater than zero");
         BigDecimal currentAdvance=bill.getAdvance()==null?BigDecimal.ZERO:bill.getAdvance();
         BigDecimal currentBalance=bill.getBalance()==null?bill.getTotal().subtract(currentAdvance):bill.getBalance();
