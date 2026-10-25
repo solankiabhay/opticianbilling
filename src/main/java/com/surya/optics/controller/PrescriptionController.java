@@ -48,7 +48,7 @@ public class PrescriptionController {
         model.addAttribute("prescription", service.findById(id));
         return "prescriptions/view";
     }
-    @GetMapping("/delete/{id}") public String delete(@PathVariable Long id) {
+    @PostMapping("/delete/{id}") public String delete(@PathVariable Long id) {
         service.delete(id); return "redirect:/prescriptions";
     }
 }
