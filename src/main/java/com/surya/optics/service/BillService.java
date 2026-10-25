@@ -18,6 +18,7 @@ public class BillService {
     public BillService(BillRepository bills, CustomerRepository customers) { this.bills=bills; this.customers=customers; }
 
     @Transactional(readOnly=true) public List<Bill> findAll(){ return bills.findAllByOrderByBillDateDesc(); }
+    @Transactional(readOnly=true) public List<Bill> findForCustomer(Long customerId){ return bills.findByCustomerIdOrderByBillDateDesc(customerId); }
     @Transactional(readOnly=true) public Bill findById(Long id){ return bills.findByIdWithCustomer(id).orElseThrow(() -> new IllegalArgumentException("Bill not found: "+id)); }
 
     @Transactional public Bill create(BillFormDTO d) {
