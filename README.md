@@ -8,7 +8,7 @@ Spring Boot + Thymeleaf billing application source with an Android WebView clien
 - GitHub Actions successfully built the **debug APK** in workflow run [Build Android APK](https://github.com/solankiabhay/opticianbilling/actions/workflows/android-apk.yml).
 - Customer age field, DTO validation, and add/edit/list/view UI changes are committed.
 - Prescription DTO display accessors format positive diopter values with a leading `+`.
-- The repository still needs the remaining original backend source files committed and a complete Maven build verified before this can be considered a complete deployment.
+- The Java CI workflow currently passes for the committed code and unit tests. However, this is not yet a complete restoration of every original module: the remaining original billing, product, payment, reporting, PDF/export and related screens/services still need to be committed before claiming full feature parity.
 
 ## Android client
 
@@ -35,6 +35,8 @@ Set backend database credentials using environment variables; never commit real 
 - `DB_URL`
 - `DB_USERNAME`
 - `DB_PASSWORD`
+- `APP_USER` (defaults to `admin`)
+- `APP_PASSWORD` (required; at least 12 characters)
 
 See `.env.example` for placeholders. Do not deploy with blank/default database credentials.
 
