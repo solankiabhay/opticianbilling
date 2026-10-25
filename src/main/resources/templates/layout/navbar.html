@@ -1,1 +1,17 @@
-<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><body><header th:fragment="navbar" class="app-navbar d-flex justify-content-between align-items-center"><span class="fw-semibold">Optician Billing</span><span class="text-muted small"><i class="fa-regular fa-shield me-1"></i>Secure session</span></header></body></html>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="navbar" class="app-navbar d-flex justify-content-between align-items-center gap-3">
+  <div class="d-flex align-items-center gap-2">
+    <button type="button" class="btn btn-outline-secondary mobile-menu-button" id="mobileMenuToggle" aria-label="Open navigation menu" aria-controls="appSidebar" aria-expanded="false">
+      <i class="fa-solid fa-bars" aria-hidden="true"></i>
+    </button>
+    <div>
+      <div class="fw-semibold">Optician Billing</div>
+      <div class="text-muted small navbar-subtitle">Store management workspace</div>
+    </div>
+  </div>
+  <span class="text-muted small text-nowrap"><i class="fa-solid fa-shield-halved me-1"></i>Secure session</span>
+</header>
+</body>
+</html>
