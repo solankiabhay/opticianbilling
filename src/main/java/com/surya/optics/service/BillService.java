@@ -68,8 +68,10 @@ public class BillService {
     @Transactional public Bill recordPayment(Long billId,BigDecimal amount,String paymentMode) {
         Bill bill=findById(billId);BigDecimal paymentAmount=nonNegative(amount,"Payment amount");
         if(paymentAmount.compareTo(BigDecimal.ZERO)<=0)throw new IllegalArgumentException("Payment amount must be greater than zero");
-        if(paymentAmount.compareTo(bill.getBalance())>0)throw new IllegalArgumentException("Payment cannot exceed outstanding balance");
-        bill.setAdvance(bill.getAdvance().add(paymentAmount));bill.setBalance(bill.getTotal().subtract(bill.getAdvance()));
+        BigDecimal currentAdvance=bill.getAdvance()==null?BigDecimal.ZERO:bill.getAdvance();
+        BigDecimal currentBalance=bill.getBalance()==null?bill.getTotal().subtract(currentAdvance):bill.getBalance();
+        if(paymentAmount.compareTo(currentBalance)>0)throw new IllegalArgumentException("Payment cannot exceed outstanding balance");
+        bill.setAdvance(currentAdvance.add(paymentAmount));bill.setBalance(bill.getTotal().subtract(bill.getAdvance()));
         String mode=paymentMode==null||paymentMode.trim().isEmpty()?bill.getPaymentMode():paymentMode.trim();
         if(mode!=null&&!mode.isEmpty())bill.setPaymentMode(mode);
         bill.setStatus(bill.getBalance().compareTo(BigDecimal.ZERO)==0?"PAID":"PENDING");
