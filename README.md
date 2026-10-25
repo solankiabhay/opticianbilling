@@ -45,6 +45,17 @@ The project currently uses spring.jpa.hibernate.ddl-auto=update for convenience.
 
 Back up the database before applying schema changes. Check the existing schema and constraints first; do not run a migration blindly on a production database.
 
+## Container deployment
+
+Docker and Docker Compose are supported for a local or staging deployment.
+
+1. Copy `.env.example` to `.env` and replace the database, MySQL root and application password placeholders with unique strong values.
+2. Run `docker compose up --build -d` from the repository root.
+3. Open `http://localhost:8080` and sign in with the `APP_USER` and `APP_PASSWORD` values from `.env`.
+4. Inspect startup with `docker compose logs -f app`; stop with `docker compose down`. The MySQL data remains in the named `mysql_data` volume.
+
+The Compose setup is for local/staging use. For public production access, put the application behind HTTPS, restrict database network access, configure backups and monitoring, and review the database migration strategy before upgrading.
+
 ## Android client
 
 The APK is a WebView client for a deployed backend; it does not bundle Spring Boot or MySQL. Deploy the backend over HTTPS, then configure the backend URL in the Android app using its Server button. A debug APK is for testing only. Play Store or production distribution needs a signed release build and protected release keystore.
