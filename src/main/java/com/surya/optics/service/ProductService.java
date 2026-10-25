@@ -17,7 +17,7 @@ public class ProductService {
     @Transactional public Product save(Product form){
         validate(form);
         Product p;
-        if(form.getId()==null){p=form;}else{p=find(form.getId());p.setName(form.getName().trim());p.setSku(form.getSku().trim().toUpperCase());p.setCategory(form.getCategory());p.setBrand(form.getBrand());p.setPurchasePrice(form.getPurchasePrice());p.setSellingPrice(form.getSellingPrice());// Preserve live stock during product edits; use the locked stock-adjustment action instead.p.setReorderLevel(form.getReorderLevel());p.setDescription(form.getDescription());p.setActive(form.isActive());}
+        if(form.getId()==null){p=form;}else{p=find(form.getId());p.setName(form.getName().trim());p.setSku(form.getSku().trim().toUpperCase());p.setCategory(form.getCategory());p.setBrand(form.getBrand());p.setPurchasePrice(form.getPurchasePrice());p.setSellingPrice(form.getSellingPrice());/* Preserve live stock during product edits; use the locked stock-adjustment action instead. */p.setReorderLevel(form.getReorderLevel());p.setDescription(form.getDescription());p.setActive(form.isActive());}
         p.setName(p.getName().trim());p.setSku(p.getSku().trim().toUpperCase());
         return products.save(p);
     }
