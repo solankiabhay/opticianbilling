@@ -50,6 +50,7 @@ class BillControllerTest {
         BillService bills = mock(BillService.class);
         CustomerService customers = mock(CustomerService.class);
         ProductService products = mock(ProductService.class);
+        InvoicePdfService pdfs = mock(InvoicePdfService.class);
         Customer customer = new Customer();
         customer.setName("   =HYPERLINK(\"https://attacker.example\")");
         customer.setPhone("+123456789");
