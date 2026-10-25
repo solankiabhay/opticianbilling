@@ -5,6 +5,7 @@ import com.surya.optics.entity.Bill;
 import com.surya.optics.entity.Customer;
 import com.surya.optics.repository.BillRepository;
 import com.surya.optics.repository.CustomerRepository;
+import com.surya.optics.repository.PaymentRepository;
 import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -15,7 +16,8 @@ import static org.mockito.Mockito.*;
 class BillServiceTest {
     private final BillRepository bills = mock(BillRepository.class);
     private final CustomerRepository customers = mock(CustomerRepository.class);
-    private final BillService service = new BillService(bills, customers);
+    private final PaymentRepository payments = mock(PaymentRepository.class);
+    private final BillService service = new BillService(bills, customers, payments);
 
     @Test
     void calculatesTotalAndOutstandingBalance() {
@@ -31,6 +33,7 @@ class BillServiceTest {
         assertEquals(new BigDecimal("1200.00"), saved.getTotal());
         assertEquals(new BigDecimal("700.00"), saved.getBalance());
         assertEquals("PENDING", saved.getStatus());
+        verify(payments).save(any(com.surya.optics.entity.Payment.class));
     }
 
     @Test
@@ -59,6 +62,7 @@ class BillServiceTest {
         assertEquals(BigDecimal.ZERO.setScale(2), paid.getBalance().setScale(2));
         assertEquals("PAID", paid.getStatus());
         assertEquals("Cash", paid.getPaymentMode());
+        verify(payments, times(2)).save(any(com.surya.optics.entity.Payment.class));
     }
 
     @Test
