@@ -98,9 +98,11 @@ public class MainActivity extends Activity {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 String scheme = uri.getScheme();
-                if ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme)) return false;
-                try { startActivity(new Intent(Intent.ACTION_VIEW, uri)); }
-                catch (ActivityNotFoundException ignored) { }
+                if (isTrustedServerUri(uri)) return false;
+                if ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme)) {
+                    try { startActivity(new Intent(Intent.ACTION_VIEW, uri)); }
+                    catch (ActivityNotFoundException ignored) { }
+                }
                 return true;
             }
             @Override public void onPageFinished(WebView view, String url) { statusView.setVisibility(View.GONE); }
@@ -127,7 +129,13 @@ public class MainActivity extends Activity {
         });
         webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
             try {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                Uri downloadUri = Uri.parse(url);
+                if (!isTrustedServerUri(downloadUri)) {
+                    statusView.setVisibility(View.VISIBLE);
+                    statusView.setText("For safety, downloads must come from your configured billing server.");
+                    return;
+                }
+                DownloadManager.Request request = new DownloadManager.Request(downloadUri);
                 String cookie = CookieManager.getInstance().getCookie(url);
                 if (cookie != null && !cookie.isEmpty()) request.addRequestHeader("Cookie", cookie);
                 request.setMimeType(mimeType);
@@ -157,7 +165,9 @@ public class MainActivity extends Activity {
             .setCancelable(false)
             .setPositiveButton("Connect", (dialog, which) -> {
                 String url = input.getText().toString().trim();
-                if (!url.startsWith("https://")) {
+                Uri candidate = Uri.parse(url);
+                if (!"https".equalsIgnoreCase(candidate.getScheme()) || candidate.getHost() == null
+                        || candidate.getUserInfo() != null) {
                     new AlertDialog.Builder(this).setTitle("HTTPS required")
                         .setMessage("For customer and prescription data safety, use an HTTPS server URL.")
                         .setPositiveButton("OK", (d, w) -> showServerDialog()).show();
@@ -172,9 +182,22 @@ public class MainActivity extends Activity {
             }).show();
     }
 
+    private boolean isTrustedServerUri(Uri uri) {
+        String configured = preferences.getString(SERVER_URL_KEY, "");
+        if (configured == null || configured.trim().isEmpty() || uri == null) return false;
+        Uri server = Uri.parse(configured);
+        return "https".equalsIgnoreCase(uri.getScheme())
+                && server.getHost() != null
+                && server.getHost().equalsIgnoreCase(uri.getHost())
+                && server.getPort() == uri.getPort()
+                && uri.getUserInfo() == null;
+    }
+
     private void loadServer(String url) {
         String normalized = url.trim().replaceAll("/+$", "");
-        if (!normalized.startsWith("https://")) { showServerDialog(); return; }
+        Uri candidate = Uri.parse(normalized);
+        if (!"https".equalsIgnoreCase(candidate.getScheme()) || candidate.getHost() == null
+                || candidate.getUserInfo() != null) { showServerDialog(); return; }
         statusView.setVisibility(View.VISIBLE);
         statusView.setText("Connecting to Surya Optics…");
         webView.loadUrl(normalized);
