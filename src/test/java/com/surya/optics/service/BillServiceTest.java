@@ -133,4 +133,20 @@ class BillServiceTest {
         verify(billItems, times(2)).save(any(com.surya.optics.entity.BillItem.class));
     }
 
+    @Test
+    void rejectsCombinedDuplicateProductQuantityAboveStock() {
+        when(customers.findById(5L)).thenReturn(Optional.of(new Customer()));
+        Product product = new Product(); product.setId(7L); product.setName("Metal Frame");
+        product.setSku("FR-7"); product.setActive(true); product.setStockQuantity(4);
+        product.setSellingPrice(new BigDecimal("250.00"));
+        when(products.findByIdForUpdate(7L)).thenReturn(Optional.of(product));
+        BillFormDTO dto = new BillFormDTO();
+        dto.setCustomerId(5L);
+        dto.setProductIds(java.util.Arrays.asList(7L, 7L));
+        dto.setQuantities(java.util.Arrays.asList(3, 2));
+        assertThrows(IllegalArgumentException.class, () -> service.create(dto));
+        verify(bills, never()).save(any(Bill.class));
+        assertEquals(4, product.getStockQuantity());
+    }
+
 }
