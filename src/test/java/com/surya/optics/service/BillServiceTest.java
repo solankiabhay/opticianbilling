@@ -149,4 +149,27 @@ class BillServiceTest {
         assertEquals(4, product.getStockQuantity());
     }
 
+    @Test
+    void defaultsMissingQuantityListToOneForSelectedProduct() {
+        when(customers.findById(5L)).thenReturn(Optional.of(new Customer()));
+        Product product = new Product();
+        product.setId(21L); product.setName("Optical Frame"); product.setSku("OF-21");
+        product.setActive(true); product.setStockQuantity(2);
+        product.setSellingPrice(new BigDecimal("300.00"));
+        when(products.findByIdForUpdate(21L)).thenReturn(Optional.of(product));
+        when(bills.save(any(Bill.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        BillFormDTO dto = new BillFormDTO();
+        dto.setCustomerId(5L);
+        dto.setProductIds(java.util.Collections.singletonList(21L));
+        dto.setQuantities(null);
+        dto.setSubtotal(BigDecimal.ZERO);
+
+        Bill saved = service.create(dto);
+
+        assertEquals(new BigDecimal("300.00"), saved.getTotal());
+        assertEquals(1, product.getStockQuantity());
+        verify(billItems).save(any(com.surya.optics.entity.BillItem.class));
+    }
+
 }
