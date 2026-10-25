@@ -40,13 +40,32 @@ public class BillService {
         BigDecimal sunglasses=nonNegative(d.getSunglassCharges(),"Sunglass charges");
         BigDecimal eyeTesting=nonNegative(d.getEyeTestingCharges(),"Eye testing charges");
         BigDecimal other=nonNegative(d.getOtherCharges(),"Other charges");
-        Product selectedProduct=null; BigDecimal productLineTotal=BigDecimal.ZERO; Integer quantity=d.getQuantity()==null?1:d.getQuantity();
-        if(d.getProductId()!=null){
+        java.util.Map<Long,Integer> requestedQuantities = new java.util.TreeMap<>();
+        if(d.getProductIds()!=null && !d.getProductIds().isEmpty()) {
+            for(int i=0;i<d.getProductIds().size();i++) {
+                Long productId=d.getProductIds().get(i);
+                if(productId==null) continue;
+                Integer requested=i<d.getQuantities().size()?d.getQuantities().get(i):1;
+                int quantity=requested==null?1:requested;
+                if(quantity<1||quantity>10000)throw new IllegalArgumentException("Product quantity must be between 1 and 10000");
+                int combined=requestedQuantities.getOrDefault(productId,0)+quantity;
+                if(combined>10000)throw new IllegalArgumentException("Combined product quantity cannot exceed 10000");
+                requestedQuantities.put(productId,combined);
+            }
+        } else if(d.getProductId()!=null) {
+            int quantity=d.getQuantity()==null?1:d.getQuantity();
             if(quantity<1||quantity>10000)throw new IllegalArgumentException("Product quantity must be between 1 and 10000");
-            selectedProduct=products.findByIdForUpdate(d.getProductId()).orElseThrow(()->new IllegalArgumentException("Selected product was not found"));
-            if(!selectedProduct.isActive())throw new IllegalArgumentException("Selected product is inactive");
-            if(selectedProduct.getStockQuantity()<quantity)throw new IllegalArgumentException("Insufficient stock for "+selectedProduct.getName()+"; available: "+selectedProduct.getStockQuantity());
-            productLineTotal=selectedProduct.getSellingPrice().multiply(BigDecimal.valueOf(quantity));
+            requestedQuantities.put(d.getProductId(),quantity);
+        }
+        java.util.Map<Product,Integer> selectedProducts = new java.util.LinkedHashMap<>();
+        BigDecimal productLineTotal=BigDecimal.ZERO;
+        for(java.util.Map.Entry<Long,Integer> requested:requestedQuantities.entrySet()) {
+            Product selected=products.findByIdForUpdate(requested.getKey()).orElseThrow(()->new IllegalArgumentException("Selected product was not found"));
+            if(!selected.isActive())throw new IllegalArgumentException("Selected product is inactive");
+            if(selected.getSellingPrice()==null||selected.getSellingPrice().compareTo(BigDecimal.ZERO)<0)throw new IllegalArgumentException("Selected product has an invalid selling price");
+            if(selected.getStockQuantity()<requested.getValue())throw new IllegalArgumentException("Insufficient stock for "+selected.getName()+"; available: "+selected.getStockQuantity());
+            selectedProducts.put(selected,requested.getValue());
+            productLineTotal=productLineTotal.add(selected.getSellingPrice().multiply(BigDecimal.valueOf(requested.getValue())));
         }
         BigDecimal total=subtotal.add(productLineTotal).add(contact).add(sunglasses).add(eyeTesting).add(other);
         BigDecimal advance=nonNegative(d.getAdvance(),"Advance");
@@ -60,7 +79,11 @@ public class BillService {
         b.setDeliveryDays(d.getDeliveryDays());b.setDeliveryDate(d.getDeliveryDays()==null?null:b.getBillDate().plusDays(d.getDeliveryDays()));
         b.setPaymentMode(d.getPaymentMode());b.setNotes(d.getNotes());b.setStatus(b.getBalance().compareTo(BigDecimal.ZERO)==0?"PAID":"PENDING");
         Bill saved=bills.save(b);
-        if(selectedProduct!=null){BillItem line=new BillItem();line.setBill(saved);line.setProduct(selectedProduct);line.setProductName(selectedProduct.getName());line.setProductSku(selectedProduct.getSku());line.setQuantity(quantity);line.setUnitPrice(selectedProduct.getSellingPrice());line.setLineTotal(productLineTotal);billItems.save(line);selectedProduct.setStockQuantity(selectedProduct.getStockQuantity()-quantity);products.save(selectedProduct);}
+        for(java.util.Map.Entry<Product,Integer> selected:selectedProducts.entrySet()) {
+            Product product=selected.getKey();Integer quantity=selected.getValue();
+            BillItem line=new BillItem();line.setBill(saved);line.setProduct(product);line.setProductName(product.getName());line.setProductSku(product.getSku());line.setQuantity(quantity);line.setUnitPrice(product.getSellingPrice());line.setLineTotal(product.getSellingPrice().multiply(BigDecimal.valueOf(quantity)));billItems.save(line);
+            product.setStockQuantity(product.getStockQuantity()-quantity);products.save(product);
+        }
         if(advance.compareTo(BigDecimal.ZERO)>0){Payment payment=new Payment();payment.setBill(saved);payment.setAmount(advance);payment.setPaymentMode(d.getPaymentMode());payment.setNote("Initial payment recorded when invoice was created");payments.save(payment);}
         return saved;
     }
