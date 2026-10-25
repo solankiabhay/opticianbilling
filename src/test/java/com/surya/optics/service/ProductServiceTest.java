@@ -16,4 +16,20 @@ class ProductServiceTest {
     @Test void rejectsDuplicateSku(){when(repository.existsBySkuIgnoreCase("FR-001")).thenReturn(true);assertThrows(IllegalArgumentException.class,()->service.save(product()));}
     @Test void stockCanBeAdjustedButNeverNegative(){Product p=product();p.setId(2L);when(repository.findByIdForUpdate(2L)).thenReturn(java.util.Optional.of(p));when(repository.save(any(Product.class))).thenAnswer(i->i.getArgument(0));assertEquals(10,service.adjustStock(2L,2).getStockQuantity());assertThrows(IllegalArgumentException.class,()->service.adjustStock(2L,-11));verify(repository,times(2)).findByIdForUpdate(2L);}
     @Test void rejectsNegativePrice(){Product p=product();p.setPurchasePrice(new BigDecimal("-1"));assertThrows(IllegalArgumentException.class,()->service.save(p));}
+    @Test void editingProductDoesNotOverwriteLiveStock() {
+        Product existing = product();
+        existing.setId(2L);
+        existing.setStockQuantity(4);
+        Product submitted = product();
+        submitted.setId(2L);
+        submitted.setStockQuantity(99);
+        when(repository.existsBySkuIgnoreCaseAndIdNot("FR-001", 2L)).thenReturn(false);
+        when(repository.findById(2L)).thenReturn(java.util.Optional.of(existing));
+        when(repository.save(any(Product.class))).thenAnswer(i -> i.getArgument(0));
+
+        Product saved = service.save(submitted);
+
+        assertEquals(4, saved.getStockQuantity(), "Editing descriptive fields must not reset stock");
+    }
+
 }
