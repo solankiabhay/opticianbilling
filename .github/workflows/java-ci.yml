@@ -17,4 +17,10 @@ jobs:
           java-version: '8'
           cache: maven
       - name: Build and test
-        run: mvn --batch-mode --no-transfer-progress test
+        run: mvn --batch-mode --no-transfer-progress verify
+      - name: Upload executable Spring Boot JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: surya-optics-application-jar
+          path: target/surya-optics-1.0.0.jar
+          if-no-files-found: error
