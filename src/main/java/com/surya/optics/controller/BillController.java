@@ -35,7 +35,7 @@ public class BillController {
     @GetMapping("/view/{id}") public String view(@PathVariable Long id,Model model){model.addAttribute("bill",service.findById(id));model.addAttribute("payments",service.findPayments(id));model.addAttribute("billItems",service.findItems(id));return "bills/view";}
     @PostMapping("/payment/{id}") public String payment(@PathVariable Long id,@RequestParam BigDecimal amount,@RequestParam(required=false) String paymentMode,Model model){
         try { service.recordPayment(id,amount,paymentMode); return "redirect:/bills/view/"+id; }
-        catch(IllegalArgumentException ex) { model.addAttribute("bill",service.findById(id)); model.addAttribute("paymentError",ex.getMessage()); return "bills/view"; }
+        catch(IllegalArgumentException ex) { model.addAttribute("bill",service.findById(id)); model.addAttribute("payments",service.findPayments(id)); model.addAttribute("billItems",service.findItems(id)); model.addAttribute("paymentError",ex.getMessage()); return "bills/view"; }
     }
     private List<Product> activeProducts(){return products.findAll().stream().filter(Product::isActive).collect(java.util.stream.Collectors.toList());}
     @GetMapping(value="/export.csv", produces="text/csv")
