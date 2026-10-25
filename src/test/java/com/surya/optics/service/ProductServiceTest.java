@@ -32,4 +32,18 @@ class ProductServiceTest {
         assertEquals(4, saved.getStockQuantity(), "Editing descriptive fields must not reset stock");
     }
 
+    @Test void productEditPreservesLiveStockAndUpdatesEditableFields(){
+        Product current=product();current.setId(2L);current.setActive(true);
+        when(repository.findByIdForUpdate(2L)).thenReturn(java.util.Optional.of(current));
+        when(repository.existsBySkuIgnoreCaseAndIdNot("FR-001",2L)).thenReturn(false);
+        when(repository.save(any(Product.class))).thenAnswer(i->i.getArgument(0));
+        Product form=product();form.setId(2L);form.setName("Updated Frame");form.setStockQuantity(1);form.setReorderLevel(5);form.setDescription("Updated details");form.setActive(false);
+        Product saved=service.save(form);
+        assertEquals(8,saved.getStockQuantity());
+        assertEquals("Updated Frame",saved.getName());
+        assertEquals(5,saved.getReorderLevel());
+        assertEquals("Updated details",saved.getDescription());
+        assertFalse(saved.isActive());
+    }
+
 }
