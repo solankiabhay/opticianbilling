@@ -2,18 +2,22 @@ package com.surya.optics.controller;
 
 import com.surya.optics.dto.CustomerDTO;
 import com.surya.optics.service.CustomerService;
+import com.surya.optics.service.BillService;
+import com.surya.optics.service.PrescriptionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.math.BigDecimal;
-import java.util.Collections;
+
 
 @Controller
 @RequestMapping("/customers")
 public class CustomerController {
     private final CustomerService service;
-    public CustomerController(CustomerService service) { this.service = service; }
+    private final BillService billService;
+    private final PrescriptionService prescriptionService;
+    public CustomerController(CustomerService service, BillService billService, PrescriptionService prescriptionService) { this.service = service; this.billService = billService; this.prescriptionService = prescriptionService; }
 
     @GetMapping public String list(Model model) {
         model.addAttribute("customers", service.getAllCustomers());
@@ -36,10 +40,12 @@ public class CustomerController {
         catch (IllegalArgumentException ex) { dto.setId(id); model.addAttribute("customer", dto); model.addAttribute("error", ex.getMessage()); return "customers/edit"; }
     }
     @GetMapping("/view/{id}") public String view(@PathVariable Long id, Model model) {
-        model.addAttribute("customer", service.getCustomerById(id));
-        model.addAttribute("bills", Collections.emptyList());
-        model.addAttribute("prescriptions", Collections.emptyList());
-        model.addAttribute("totalSpent", BigDecimal.ZERO);
+        CustomerDTO customer = service.getCustomerById(id);
+        java.util.List<com.surya.optics.entity.Bill> bills = billService.findForCustomer(id);
+        model.addAttribute("customer", customer);
+        model.addAttribute("bills", bills);
+        model.addAttribute("prescriptions", prescriptionService.findForCustomer(id));
+        model.addAttribute("totalSpent", bills.stream().map(com.surya.optics.entity.Bill::getTotal).filter(java.util.Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
         return "customers/view";
     }
     @GetMapping("/history/{id}") public String history(@PathVariable Long id, Model model) {
