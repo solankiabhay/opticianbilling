@@ -16,6 +16,8 @@ jobs:
           distribution: temurin
           java-version: '8'
           cache: maven
+      - name: Validate Docker Compose configuration
+        run: docker compose --env-file .env.example config > /dev/null
       - name: Build and test
         run: mvn --batch-mode --no-transfer-progress verify
       - name: Upload executable Spring Boot JAR
