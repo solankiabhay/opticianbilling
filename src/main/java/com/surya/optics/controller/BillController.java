@@ -6,6 +6,8 @@ import com.surya.optics.entity.Product;
 import com.surya.optics.service.ProductService;
 import com.surya.optics.service.BillService;
 import com.surya.optics.service.CustomerService;
+import com.surya.optics.service.InvoicePdfService;
+import com.lowagie.text.DocumentException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +20,8 @@ import java.util.List;
 @Controller
 @RequestMapping("/bills")
 public class BillController {
-    private final BillService service; private final CustomerService customers; private final ProductService products;
-    public BillController(BillService service,CustomerService customers,ProductService products){this.service=service;this.customers=customers;this.products=products;}
+    private final BillService service; private final CustomerService customers; private final ProductService products; private final InvoicePdfService pdfs;
+    public BillController(BillService service,CustomerService customers,ProductService products,InvoicePdfService pdfs){this.service=service;this.customers=customers;this.products=products;this.pdfs=pdfs;}
     @GetMapping public String list(Model model){
         List<Bill> bills=service.findAll();
         BigDecimal billed=bills.stream().map(Bill::getTotal).filter(java.util.Objects::nonNull).reduce(BigDecimal.ZERO,BigDecimal::add);
@@ -38,6 +40,14 @@ public class BillController {
         catch(IllegalArgumentException ex) { model.addAttribute("bill",service.findById(id)); model.addAttribute("payments",service.findPayments(id)); model.addAttribute("billItems",service.findItems(id)); model.addAttribute("paymentError",ex.getMessage()); return "bills/view"; }
     }
     private List<Product> activeProducts(){return products.findAll().stream().filter(Product::isActive).collect(java.util.stream.Collectors.toList());}
+    @GetMapping(value="/pdf/{id}", produces="application/pdf")
+    public void exportPdf(@PathVariable Long id, HttpServletResponse response) throws IOException, DocumentException {
+        Bill bill=service.findById(id);
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition","attachment; filename=invoice-"+bill.getBillNumber()+".pdf");
+        pdfs.write(bill,service.findItems(id),service.findPayments(id),response.getOutputStream());
+    }
+
     @GetMapping(value="/export.csv", produces="text/csv")
     public void exportCsv(HttpServletResponse response) throws IOException {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
