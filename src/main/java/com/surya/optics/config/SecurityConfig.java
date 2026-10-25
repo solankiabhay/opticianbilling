@@ -31,7 +31,7 @@ public class SecurityConfig {
     @Bean public org.springframework.security.web.SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests().antMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/error").permitAll()
             .anyRequest().authenticated()
-            .and().formLogin().permitAll()
+            .and().formLogin().loginPage("/login").defaultSuccessUrl("/dashboard", true).failureUrl("/login?error").permitAll()
             .and().logout().logoutSuccessUrl("/login?logout").permitAll();
         return http.build();
     }
