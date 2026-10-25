@@ -45,7 +45,7 @@ public class BillService {
             for(int i=0;i<d.getProductIds().size();i++) {
                 Long productId=d.getProductIds().get(i);
                 if(productId==null) continue;
-                Integer requested=i<d.getQuantities().size()?d.getQuantities().get(i):1;
+                Integer requested=d.getQuantities()!=null && i<d.getQuantities().size()?d.getQuantities().get(i):1;
                 int quantity=requested==null?1:requested;
                 if(quantity<1||quantity>10000)throw new IllegalArgumentException("Product quantity must be between 1 and 10000");
                 int combined=requestedQuantities.getOrDefault(productId,0)+quantity;
