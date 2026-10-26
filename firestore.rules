@@ -1,0 +1,51 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function activeShopMember(shopId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/shops/$(shopId)/members/$(request.auth.uid))
+        && get(/databases/$(database)/documents/shops/$(shopId)/members/$(request.auth.uid)).data.active == true;
+    }
+
+    // Shop and membership administration is intentionally not client-writable.
+    // Bootstrap the first shop/member from the Firebase Console or a trusted admin process.
+    match /shops/{shopId} {
+      allow read: if activeShopMember(shopId);
+      allow create, update, delete: if false;
+
+      match /members/{userId} {
+        allow read: if signedIn() && request.auth.uid == userId;
+        allow create, update, delete: if false;
+      }
+
+      match /customers/{documentId} {
+        allow read, write: if activeShopMember(shopId);
+      }
+      match /prescriptions/{documentId} {
+        allow read, write: if activeShopMember(shopId);
+      }
+      match /invoices/{documentId} {
+        allow read, write: if activeShopMember(shopId);
+      }
+      match /inventory/{documentId} {
+        allow read, write: if activeShopMember(shopId);
+      }
+      match /payments/{documentId} {
+        allow read, write: if activeShopMember(shopId);
+      }
+      match /settings/{documentId} {
+        allow read, write: if activeShopMember(shopId);
+      }
+    }
+
+    // Default-deny every path not explicitly listed above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
